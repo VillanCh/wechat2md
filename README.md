@@ -59,11 +59,58 @@ gggggggggggggggggggggggggggggggggggg      gggggggggggggggggggggggggggggg      gg
 
 **任何人都可以以任何目的使用本项目**，感谢 @fengxxc 开源精神。
 
-## 使用
+# 功能特点：
 
-### 
+*. 从指定的微信公众号文章 URL 解析内容并转换为 Markdown 格式。
+*. 支持多种图片处理方式：直接保存、使用 base64 编码、引用原始 URL。
+*. 可自定义输出文件名、输出目录、静态资源目录等。
+*. 提供服务器模式，可启动一个简单的 HTTP 服务。
 
-### 1. 安装依赖
+# 使用
+
+## 环境要求
+
+至少有一个 Go 语言的 1.20 以及以上版本.
+
+## 1. 手动编译使用
+
+```
+# 克隆源码仓库
+git clone https://github.com/VillanCh/wechat2md.git
+
+# 进入项目目录
+cd wechat2md
+
+# 编译生成可执行文件
+go build -o wechat2md.go
+
+# 安装到本地
+go install wechat2md.go
+```
+
+## 2. 使用说明
+
+```
+NAME:
+   wechat2md - A new cli application
+
+USAGE:
+   wechat2md [global options] command [command options] [arguments...]
+
+COMMANDS:
+   server
+   help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   -o value, --output value
+   --image value             image format: base64, url, save (default: "save")
+   --dir value               (default: "docs")
+   --static value            (default: "static/articles")
+   --path-abs, --abs         use absolute path in img link
+   --help, -h                show help
+```
+
+
 
 ```bash
 ```
