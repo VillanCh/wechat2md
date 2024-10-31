@@ -109,8 +109,3 @@ GLOBAL OPTIONS:
    --path-abs, --abs         use absolute path in img link
    --help, -h                show help
 ```
-
-
-
-```bash
-```

@@ -81,6 +81,10 @@ func main() {
 			Name:  "path-abs,abs",
 			Usage: "use absolute path in img link",
 		},
+		cli.StringFlag{
+			Name:  "link-prefix",
+			Usage: `fix image link prefix, default is static dir,`,
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -139,11 +143,15 @@ func main() {
 				return err
 			}
 
-			var prefix = ""
-			if c.Bool("path-abs") {
-				prefix = divider
+			linkPrefix := c.String("link-prefix")
+			if linkPrefix == "" {
+				prefix := ""
+				if c.Bool("path-abs") {
+					prefix = divider
+				}
+				linkPrefix = prefix + staticFileDir
 			}
-			raw = bytes.ReplaceAll(raw, []byte("wechat2md-"), []byte(prefix+staticFileDir+"wechat2md-"))
+			raw = bytes.ReplaceAll(raw, []byte("wechat2md-"), []byte(linkPrefix+"wechat2md-"))
 			if err := os.Remove(output); err == nil {
 				os.WriteFile(output, raw, 0644)
 				return nil
