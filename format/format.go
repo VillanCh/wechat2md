@@ -58,7 +58,7 @@ func legalizationFilenameForWindows(name string) string {
 }
 
 // FormatAndSave fomat article and save to local file
-func FormatAndSave(article parse.Article, filePath string) error {
+func FormatAndSave(article parse.Article, filePath string, staticDir string) error {
 	// basrPath := filepath.Join(filePath, )
 	var basePath string
 	var fileName string
@@ -102,7 +102,11 @@ func FormatAndSave(article parse.Article, filePath string) error {
 	if len(saveImageBytes) > 0 {
 		for imgTitle := range saveImageBytes {
 			// save to local
-			imgfileName := filepath.Join(basePath, imgTitle)
+			staticPathBase := staticDir
+			if staticPathBase == "" {
+				staticPathBase = basePath
+			}
+			imgfileName := filepath.Join(staticPathBase, imgTitle)
 			/* if err := ioutil.WriteFile(imgfileName, saveImageBytes[imgTitle], 0644); err != nil {
 				log.Fatalf("can not save image file: %s\n err: %v", imgfileName, err)
 				continue
@@ -166,7 +170,7 @@ func formatContent(pieces []parse.Piece, depth int) (string, map[string][]byte) 
 				// will save to local
 				src := piece.Attrs["src"]
 				imgExt := util.ParseImageExtFromSrc(src)
-				var hashName string = util.MD5(piece.Val.([]byte)) + "." + imgExt
+				var hashName string = "wechat2md-" + util.MD5(piece.Val.([]byte)) + "." + imgExt
 				saveImageBytes[hashName] = piece.Val.([]byte)
 				pieceMdStr = formatImageFileReferInline(piece.Attrs["alt"], hashName)
 			}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/VillanCh/wechat2md/format"
 	"github.com/VillanCh/wechat2md/parse"
@@ -68,6 +69,18 @@ func main() {
 			Value: "save",
 			Usage: "image format: base64, url, save",
 		},
+		cli.StringFlag{
+			Name:  "dir",
+			Value: "docs",
+		},
+		cli.StringFlag{
+			Name:  "static",
+			Value: filepath.Join("static", "articles"),
+		},
+		cli.BoolFlag{
+			Name:  "path-abs,abs",
+			Usage: "use absolute path in img link",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -93,17 +106,52 @@ func main() {
 
 		output := c.String("output")
 		if output == "" {
-			output = "./output.md"
+			output = "output.md"
 		}
 		if filepath.Ext(output) != ".md" {
 			output = output + ".md"
 		}
 
-		imagePolicy := parse.ImageArgValue2ImagePolicy(image)
+		divider := string(os.PathSeparator)
 
+		staticFileDir := c.String("static")
+		staticFileDir = strings.TrimRight(staticFileDir, divider) + divider
+		os.MkdirAll(staticFileDir, 0755)
+
+		dir := c.String("dir")
+		dir = strings.TrimRight(dir, divider) + divider
+		os.MkdirAll(dir, 0755)
+
+		output = filepath.Join(dir, output)
+
+		imagePolicy := parse.ImageArgValue2ImagePolicy(image)
 		fmt.Printf("url: %s, filename: %s, image: %s\n", args[0], output, image)
 		article := parse.ParseFromURL(args[0], imagePolicy)
-		return format.FormatAndSave(article, output)
+		err := format.FormatAndSave(article, output, staticFileDir)
+		if err != nil {
+			return err
+		}
+
+		if staticFileDir != "" {
+			fmt.Println("start to handle image link")
+			raw, err := os.ReadFile(output)
+			if err != nil {
+				return err
+			}
+
+			var prefix = ""
+			if c.Bool("path-abs") {
+				prefix = divider
+			}
+			raw = bytes.ReplaceAll(raw, []byte("wechat2md-"), []byte(prefix+staticFileDir+"wechat2md-"))
+			if err := os.Remove(output); err == nil {
+				os.WriteFile(output, raw, 0644)
+				return nil
+			}
+			return errors.Errorf("failed to handle image link")
+		}
+
+		return nil
 	}
 
 	err := app.Run(os.Args)
